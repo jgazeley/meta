@@ -164,6 +164,15 @@ char** get_filenames(char* path, int* count/*, const char* ext*/) {
     return fileList;
 }
 
+// List files found and file number
+void print_filenames(char* fileList[], int fcount)
+{
+    for (int i = 0; i < fcount; i++) {
+        printf("File #%2d | %s\n", i, fileList[i]);
+    }
+    putc('\n', stdout);    
+}
+
 /*
  *----------------------------------------------------------------------
  *
@@ -265,21 +274,14 @@ int main(int argc, char* argv[])
             toLowerCase(tag->artist);
             toLowerCase(tag->album);
             toLowerCase(tag->title);
-            printf("Artist:  \t%s\n", tag->artist);
-            printf("Album:   \t%s\n", tag->album);
-            printf("Title:   \t%s\n", tag->title);
-            printf("Date:    \t%s\n", tag->date);
-            printf("Genre:   \t%s\n", tag->genre);
-            printf("Track:   \t%d/%d\n", tag->track[0], tag->track[1]);
-            if (tag->disc[0] != 0) {
-                printf("Disc:    \t%d/%d\n", tag->disc[0], tag->disc[1]);
-            }
-            printf("Source file:  \t%s\n\n", tag->pathname);
+            print_audioMetaData(tag);
         }
 
         // Free the dynamically allocated memory
         free(tag);
     }
+
+    print_filenames(fileList, fcount);
 
     // Free allocated memory for each file name
     for (int i = 0; i < fcount; i++) {
@@ -287,12 +289,6 @@ int main(int argc, char* argv[])
     }
     // Free memory for the array of strings
     free(fileList);
-
-    // // DEBUG: List files found and file number
-    // for (int i = 0; i < fcount; i++) {
-    //     printf("File #%2d | %s\n", i, fileList[i]);
-    // }
-    // putc('\n', stdout);
 
     printf("Program complete.\n");
 

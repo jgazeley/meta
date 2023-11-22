@@ -33,6 +33,20 @@ void initialize_audioMetaData(audioMetaData* meta, const char* filename, char* e
     }
 }
 
+void print_audioMetaData(audioMetaData* meta)
+{
+    printf("Artist:  \t%s\n", meta->artist);
+    printf("Album:   \t%s\n", meta->album);
+    printf("Title:   \t%s\n", meta->title);
+    printf("Date:    \t%s\n", meta->date);
+    printf("Genre:   \t%s\n", meta->genre);
+    printf("Track:   \t%d/%d\n", meta->track[0], meta->track[1]);
+    if (meta->disc[0] != 0) {
+        printf("Disc:    \t%d/%d\n", meta->disc[0], meta->disc[1]);
+    }
+    printf("Source file:  \t%s\n\n", meta->pathname);
+}
+
 /*
  *----------------------------------------------------------------------
  *
