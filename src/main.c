@@ -274,7 +274,7 @@ int main(int argc, char* argv[])
             if (tag->disc[0] != 0) {
                 printf("Disc:    \t%d/%d\n", tag->disc[0], tag->disc[1]);
             }
-            printf("Source:  \t%s\n\n", tag->pathname);
+            printf("Source file:  \t%s\n\n", tag->pathname);
         }
 
         // Free the dynamically allocated memory
