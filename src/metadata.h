@@ -40,7 +40,7 @@ bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length);
 bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size);
 
 // Function to read FLAC file and populate metadata
-audioMetaData* readFlacFile(const char* filename);
+audioMetaData* get_audioMetaData_flac(const char* filename);
 
 // Function to read MP3 file and populate metadata
 audioMetaData* readMP3File(const char* filename);

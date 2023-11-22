@@ -204,7 +204,7 @@ bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size)
  *
  *----------------------------------------------------------------------
  */
-audioMetaData* readFlacFile(const char* filename)
+audioMetaData* get_audioMetaData_flac(const char* filename)
 {
     audioMetaData* flac_meta = (audioMetaData*)malloc(sizeof(audioMetaData));
     FILE* file;                     // the FLAC file containing metadata

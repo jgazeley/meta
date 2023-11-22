@@ -259,7 +259,7 @@ int main(int argc, char* argv[])
         audioMetaData* tag = NULL;
         ftype = strrchr(fileList[i], '.') + 1;
         if (!strcmp(ftype, "flac")) {
-            tag = readFlacFile(fileList[i]);
+            tag = get_audioMetaData_flac(fileList[i]);
         }
         else if (!strcmp(ftype, "mp3")) {
             tag = readMP3File(fileList[i]);
