@@ -12,111 +12,9 @@
  *
  *----------------------------------------------------------------------
  */
-#include "metadata.h"
-#include "filelist.h"
-
-#define MAX_CMD 64
-
-/*
- *----------------------------------------------------------------------
- *
- * setup --
- *
- * @brief    Creates/reads a configuration file and initializes the source and destination paths.
- *
- * @param    src_path   A pointer to the buffer for the source path.
- * @param    dest_path  A pointer to the buffer for the destination path.
- *
- * @return   This function reads a configuration file ('dir.ini') to set the source and destination
- *           paths. If the file doesn't exist, it creates a new one, initializes it with default values,
- *           prompts the user to set the source and destination paths, and then terminates the program.
- *           If the configuration file exists, it reads the source and destination paths from the file
- *           and updates the corresponding parameters.
- *
- *----------------------------------------------------------------------
- */
-void setup(char* src_path, char* dest_path)
-{
-    FILE* cfg;
-    const char* config = "dir.ini";
-    char cmd[MAX_CMD] = "";
-    char line[_MAX_PATH] = "";
-    size_t len = 0;
-
-    // Open the config file if it exists, or create it
-    if (!(cfg = fopen(config, "rb"))) {
-        printf("Configuration file doesn't exist. Creating...\n");
-        if (!(cfg = fopen(config, "wb"))) {
-            printf("Error creating file!\n");
-            exit(1);
-        }
-
-        // Initialize configuration file
-        fprintf(cfg, "[Directory]\nSource=\nDestination=\n");
-        printf("%s created successfully, please set the ", config);
-        printf("source and destination path.\n");
-        fclose(cfg);
-
-        // Open configuration file in notepad and terminate this program
-        sprintf(cmd, "notepad %s", config);
-        system(cmd);
-        exit(1);
-    }
-
-    // Read source and destination path from the config file
-    while (fgets(line, _MAX_PATH, cfg)) {
-        if (!strncmp(line, "Source=", strlen("Source="))) {
-            strcpy(src_path, strchr(line, '=') + 1);
-            len = strlen(src_path);
-            if (len > 0 && src_path[len - 1] == '\n')
-                src_path[len - 1] = '\0';
-        }
-
-        if (!strncmp(line, "Destination=", strlen("Destination="))) {
-            strcpy(dest_path, strchr(line, '=') + 1);
-            len = strlen(dest_path);
-            if (len > 0 && dest_path[len - 1] == '\n')
-                dest_path[len - 1] = '\0';
-        }
-    } fclose(cfg);
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * toLowerCase --
- *
- * @brief Converts specific words within a string to lowercase, preserving spaces.
- *
- * @param str A pointer to the string to be converted to lowercase.
- *
- * This function iterates through a list of words and converts occurrences of those words
- * within the given string to lowercase, while preserving spaces. The function modifies
- * the input string in place.
- *
- *----------------------------------------------------------------------
- */
-void toLowerCase(char* str)
-{
-    // "function words" that are converted to lowercase
-    char* words[] = {
-        " In ", " Is ", " The ", " With ", " A ", " As ", " At ",
-        " And ", " For ", " From ", " To ", " Or ", " Of ", " On "
-    };
-
-    // Iterate through each word and convert to lowercase
-    for (int i = 0; i < sizeof(words) / sizeof(char*); i++) {
-        char* word = words[i];
-        char* start = str;
-        while ((start = strstr(start, word)) != NULL) {
-            char* end = start + strlen(word);
-            while (start < end) {
-                *start = tolower(*start);
-                start++;
-            }
-        }
-    }
-}
+#include "../include/config.h"
+#include "../include/filelist.h"
+#include "../include/metadata.h"
 
 /*
  *----------------------------------------------------------------------
@@ -179,9 +77,6 @@ int main(int argc, char* argv[])
             printf("Skipping [%s]\n\n", fileList[i]);
         }
         else {
-            toLowerCase(tag->artist);
-            toLowerCase(tag->album);
-            toLowerCase(tag->title);
             print_audioMetaData(tag);
         }
 

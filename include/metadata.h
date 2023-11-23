@@ -31,16 +31,22 @@ typedef struct audioMetaData {
 } audioMetaData;
 
 // Function to initialize audio metadata structure
-void initialize_audioMetaData(audioMetaData* meta, const char* filename, char* ext);
+static void initialize_audioMetaData(audioMetaData* meta, const char* filename, char* ext);
+
+// Display the members of an audioMetaData struct
+void print_audioMetaData(audioMetaData* meta);
 
 // Helper function to validate FLAC metadata
-bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length);
+static bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length);
 
 // Helper function to parse FLAC metadata
-bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size);
+static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size);
 
 // Function to read FLAC file and populate metadata
 audioMetaData* get_audioMetaData_flac(const char* filename);
 
 // Function to read MP3 file and populate metadata
 audioMetaData* get_audioMetaData_mp3(const char* filename);
+
+// Converts certain words to lowercase (for use in titles, artist and album names)
+static void toLowerCase(char* str);

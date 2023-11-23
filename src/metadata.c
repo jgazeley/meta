@@ -1,4 +1,4 @@
-#include "metadata.h"
+#include "../include/metadata.h"
 
 /*
  *----------------------------------------------------------------------
@@ -17,7 +17,7 @@
  *
  *----------------------------------------------------------------------
  */
-void initialize_audioMetaData(audioMetaData* meta, const char* filename, char* ext)
+static void initialize_audioMetaData(audioMetaData* meta, const char* filename, char* ext)
 {
     // Initialize struct member values
     strcpy(meta->pathname, filename);
@@ -81,7 +81,7 @@ void print_audioMetaData(audioMetaData* meta)
  *
  *----------------------------------------------------------------------
  */
-bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length) {
+static bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length) {
     bool result = true;
 
     // Allocate memory for the reference libFLAC identifier
@@ -126,7 +126,7 @@ bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length) {
  *
  *----------------------------------------------------------------------
  */
-bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size)
+static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size)
 {
     DWORD length = 0;
     char* tagString = NULL;
@@ -156,12 +156,15 @@ bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size)
         // Check for the specific tags and assign values to variables accordingly
         if (_strnicmp(tagString, "ARTIST=", strlen("ARTIST=")) == 0) {
             strcpy(flac_meta->artist, strchr(tagString, '=') + 1);
+            toLowerCase(flac_meta->artist);
         }
         else if (_strnicmp(tagString, "ALBUM=", 6) == 0) {
             strcpy(flac_meta->album, strchr(tagString, '=') + 1);
+            toLowerCase(flac_meta->album);
         }
         else if (_strnicmp(tagString, "TITLE=", 6) == 0) {
             strcpy(flac_meta->title, strchr(tagString, '=') + 1);
+            toLowerCase(flac_meta->title);
         }
         else if (_strnicmp(tagString, "GENRE=", 6) == 0) {
             strcpy(flac_meta->genre, strchr(tagString, '=') + 1);
@@ -342,4 +345,42 @@ audioMetaData* get_audioMetaData_mp3(const char* filename)
 
     fclose(file);
     return mp3_meta;
+}
+
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * toLowerCase --
+ *
+ * @brief Converts specific words within a string to lowercase, preserving spaces.
+ *
+ * @param str A pointer to the string to be converted to lowercase.
+ *
+ * This function iterates through a list of words and converts occurrences of those words
+ * within the given string to lowercase, while preserving spaces. The function modifies
+ * the input string in place.
+ *
+ *----------------------------------------------------------------------
+ */
+static void toLowerCase(char* str)
+{
+    // "function words" that are converted to lowercase
+    char* words[] = {
+        " In ", " Is ", " The ", " With ", " A ", " As ", " At ",
+        " And ", " For ", " From ", " To ", " Or ", " Of ", " On "
+    };
+
+    // Iterate through each word and convert to lowercase
+    for (int i = 0; i < sizeof(words) / sizeof(char*); i++) {
+        char* word = words[i];
+        char* start = str;
+        while ((start = strstr(start, word)) != NULL) {
+            char* end = start + strlen(word);
+            while (start < end) {
+                *start = tolower(*start);
+                start++;
+            }
+        }
+    }
 }
