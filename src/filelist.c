@@ -105,3 +105,20 @@ void print_filenames(char* fileList[], int fcount)
     }
     putc('\n', stdout);    
 }
+
+// int main()
+// {
+//     int count = 0;
+//     char* src = "C:\\Users\\Jayson\\Desktop";
+//     char** list = get_filenames(src, &count);
+//     print_filenames(list, count);
+
+//     // Free allocated memory for each file name
+//     for (int i = 0; i < count; i++) {
+//         free(list[i]);
+//     }
+//     // Free memory for the array of strings
+//     free(list);
+
+//     return 0;
+// }
