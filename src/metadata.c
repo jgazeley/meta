@@ -33,6 +33,21 @@ void initialize_audioMetaData(audioMetaData* meta, const char* filename, char* e
     }
 }
 
+/*
+ *----------------------------------------------------------------------
+ *
+ * print_audioMetaData --
+ *
+ * @brief Prints the members of an audioMetaData structure.
+ *
+ * @param meta A pointer to the audioMetaData structure to be printed.
+ *
+ * This function prints the fields of an audioMetaData structure.
+ *
+ * @return None.
+ *
+ *----------------------------------------------------------------------
+ */
 void print_audioMetaData(audioMetaData* meta)
 {
     printf("Artist:  \t%s\n", meta->artist);
@@ -189,7 +204,7 @@ bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size)
 /*
  *----------------------------------------------------------------------
  *
- * readFlacFile --
+ * get_audioMetaData_flac --
  *
  * @brief Reads FLAC metadata from a file and populates an audioMetaData structure.
  *
@@ -209,8 +224,8 @@ audioMetaData* get_audioMetaData_flac(const char* filename)
     audioMetaData* flac_meta = (audioMetaData*)malloc(sizeof(audioMetaData));
     FILE* file;                     // the FLAC file containing metadata
     BYTE header[sizeof(int)];       // for each 4 byte header containing the type and size of the following block
+    BYTE* buffer = NULL;            // a buffer for the relevant metadata
     int bytesRead;                  // used to verify fread() function is successful
-    BYTE* buffer;                   // a buffer for the relevant metadata
     bool finalBlock = false;        // true if the current block is the final one (MSB of header is set)
 
     // Open the FLAC file for reading
@@ -220,12 +235,10 @@ audioMetaData* get_audioMetaData_flac(const char* filename)
     }
 
     // Check if the first 4 bytes are 'fLaC' indicating a valid flac file
-    fread(header, sizeof(BYTE), 4, file);
-    if (memcmp(header, "fLaC", 4) != 0) {
+    bytesRead = fread(header, sizeof(BYTE), 4, file);
+    if (bytesRead < 4 || memcmp(header, "fLaC", 4) != 0) {
         printf("Error: Not a real FLAC file. ");
-        fclose(file);
-        free(flac_meta);
-        return NULL;
+        goto cleanup;
     }
 
     // Initialize default struct values for artist/album...etc
@@ -237,7 +250,7 @@ audioMetaData* get_audioMetaData_flac(const char* filename)
         bytesRead = fread(header, sizeof(BYTE), 4, file);
         if (bytesRead < sizeof(int)) {
             printf("Error: Data missing or corrupt. ");
-            return NULL;
+            goto cleanup;
         }
 
         finalBlock = header[0] & 0x80;
@@ -248,21 +261,19 @@ audioMetaData* get_audioMetaData_flac(const char* filename)
         if (blockType == FLAC_META_VORBIS_COMMENT) {
             // Allocate buffer for metadata block
             if (!(buffer = (BYTE*)malloc(blockSize))) {
-                fclose(file);
-                free(flac_meta); // Free the allocated memory
-                return NULL;
+                goto cleanup;
             }
 
             // Read metadata block into the buffer
             bytesRead = fread(buffer, sizeof(BYTE), blockSize, file);
             if (bytesRead < blockSize) {
                 printf("Error: Couldn't read tag info. ");
-                return NULL;
+                goto cleanup;
             }
 
             if (!(parseFlacMeta(flac_meta, buffer, blockSize))) {
                 printf("FLAC file could not be parsed.");
-                return NULL;
+                goto cleanup;
             }
 
             // Free the buffer after processing
@@ -276,12 +287,18 @@ audioMetaData* get_audioMetaData_flac(const char* filename)
 
     fclose(file);
     return flac_meta;
+
+cleanup:
+    fclose(file);
+    free(buffer);
+    free(flac_meta);
+    return NULL;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * readMP3File --
+ * get_audioMetaData_mp3 --
  *
  * @brief Reads MP3 ID3v2 metadata from a file and populates an audioMetaData structure.
  *
@@ -296,7 +313,7 @@ audioMetaData* get_audioMetaData_flac(const char* filename)
  *
  *----------------------------------------------------------------------
  */
-audioMetaData* readMP3File(const char* filename)
+audioMetaData* get_audioMetaData_mp3(const char* filename)
 {
     audioMetaData* mp3_meta = (audioMetaData*)malloc(sizeof(audioMetaData));
     FILE* file;                     // the MP3 file containing metadata

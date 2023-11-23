@@ -20,7 +20,7 @@ typedef unsigned long DWORD;
 
 typedef struct audioMetaData {
     char pathname[_MAX_PATH];
-    char fileext[5];
+    char fileext[10];
     char artist[32];
     char album[128];
     char title[128];
@@ -33,14 +33,14 @@ typedef struct audioMetaData {
 // Function to initialize audio metadata structure
 void initialize_audioMetaData(audioMetaData* meta, const char* filename, char* ext);
 
-// Function to validate FLAC metadata
+// Helper function to validate FLAC metadata
 bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length);
 
-// Function to parse FLAC metadata
+// Helper function to parse FLAC metadata
 bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size);
 
 // Function to read FLAC file and populate metadata
 audioMetaData* get_audioMetaData_flac(const char* filename);
 
 // Function to read MP3 file and populate metadata
-audioMetaData* readMP3File(const char* filename);
+audioMetaData* get_audioMetaData_mp3(const char* filename);
