@@ -82,7 +82,22 @@ char** get_filenames(char* path, int* count/*, const char* ext*/) {
     return fileList;
 }
 
-// List files found and file number
+/*
+ *----------------------------------------------------------------------
+ *
+ * print_filenames --
+ *
+ * @brief Prints the strings in an array of file names.
+ *
+ * @param fileList An array of file names to be printed.
+ * @param fcount   The number of file names in the array.
+ *
+ * This function prints the file names in the specified array along with their indices.
+ *
+ * @return None.
+ *
+ *----------------------------------------------------------------------
+ */
 void print_filenames(char* fileList[], int fcount)
 {
     for (int i = 0; i < fcount; i++) {
