@@ -106,6 +106,7 @@ void print_filenames(char* fileList[], int fcount)
     putc('\n', stdout);    
 }
 
+// Test
 // int main()
 // {
 //     int count = 0;
