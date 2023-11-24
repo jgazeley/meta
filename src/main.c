@@ -79,9 +79,7 @@ int main(int argc, char* argv[])
             printf("Skipping [%s]\n\n", fileList[i]);
         }
         else {
-
-            //print_audioMetaData(tag);
-            print("Everything ok so far...");
+            printf("%s\n", fileList[i]);
             create_artist_folder(tag, dest_dir);
             putc('\n', stdout);
         }

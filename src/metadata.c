@@ -22,11 +22,11 @@ static void initialize_audioMetaData(audioMetaData* meta, const char* filename, 
     // Initialize struct member values
     strcpy(meta->pathname, filename);
     strcpy(meta->fileext, ext);
-    strcpy(meta->artist, "N/A");
-    strcpy(meta->album, "N/A");
-    strcpy(meta->title, "N/A");
-    strcpy(meta->date, "N/A");
-    strcpy(meta->genre, "N/A");
+    strcpy(meta->artist, "");
+    strcpy(meta->album, "");
+    strcpy(meta->title, "");
+    strcpy(meta->date, "");
+    strcpy(meta->genre, "");
     for (int i = 0; i < 2; i++) {
         meta->track[i] = 0;
         meta->disc[i] = 0;
@@ -384,9 +384,19 @@ static void toLowerCase(char* str)
     }
 }
 
+int is_valid_drive_path(const char* path) {
+#ifdef _WIN32
+    // Check for Windows drive letter and colon followed by optional backslash or forward slash
+    return (isalpha(path[0]) && path[1] == ':' && (path[2] == '\0' || path[2] == '/' || path[2] == '\\'));
+#else
+    // Add Unix/Linux path validation if needed
+    // For Unix/Linux, you might want to check for a leading slash '/'
+    // For simplicity, this example assumes a relative path is valid
+    return 1; // Always return true for non-Windows platforms in this example
+#endif
+}
+
 /*
- *----------------------------------------------------------------------
- *
  * create_artist_folder --
  *
  * @brief Creates a folder for an artist, handling special cases for names starting with "The ".
@@ -399,10 +409,25 @@ static void toLowerCase(char* str)
  *
  *----------------------------------------------------------------------
  */
-int create_artist_folder(audioMetaData* meta, char* dest_dir)
-{
+int create_artist_folder(audioMetaData* meta, char* dest_dir) {
+    // Check if dest_dir is a valid drive path
+    if (!is_valid_drive_path(dest_dir)) {
+        fprintf(stderr, "Error (dir.ini): The destination directory '%s' is not a valid drive path.\n", dest_dir);
+        return 1;
+    }
+
+    // Check if dest_dir is a valid directory with read and write permissions
+    if (_access(dest_dir, 4) != 0 || _access(dest_dir, 2) != 0) {
+        fprintf(stderr, "Error (dir.ini): The destination directory '%s' is not a valid directory or does not have read and write permissions.\n", dest_dir);
+        return 1;
+    }
+
     char folder_name[MAX_LENGTH] = "";
     char* artistNoTHE = NULL;
+    if (strlen(meta->artist) == 0 ) {
+        printf("Error (%s): Artist field is blank.\n", meta->pathname);
+        return 1;
+    }
 
     // If the artist name starts with "The ", move The to the end. (The Band -> Band, The)
     if (strncmp(meta->artist, "The ", strlen("The ")) == 0) {
@@ -423,14 +448,17 @@ int create_artist_folder(audioMetaData* meta, char* dest_dir)
         }
     }
 
-    printf("%s\n", folder_name);
+    // Check if the folder already exists
+    if (_access(folder_name, 0) == 0) {
+        printf("Directory '%s' already exists. Skipping creation.\n", folder_name);
+        return 0;
+    }
 
-    // Use the mkdir function to create a new directory
-    if (mkdir(folder_name, FULL_PERMISSIONS) == 0) {
-        printf("Directory '%s' created successfully.\n", folder_name);
-        return 1;
+    // Use the _mkdir function to create a new directory
+    if (_mkdir(folder_name) == 0) {
+        return 0;
     } else {
         perror("Error creating directory");
-        return 0;
+        return 1;
     }
 }

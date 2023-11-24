@@ -11,6 +11,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#ifdef _WIN32
+#include <direct.h>
+#include <io.h>
+#define access _access
+#else
+#include <unistd.h>
+#endif
 
 #define strcasecmp _stricmp
 #define FLAC_META_VORBIS_COMMENT 4
@@ -52,6 +59,9 @@ audioMetaData* get_audioMetaData_mp3(const char* filename);
 
 // Converts certain words to lowercase (for use in titles, artist and album names)
 static void toLowerCase(char* str);
+
+// Check for Windows drive letter and colon followed by optional backslash or forward slash
+int is_valid_drive_path(const char* path);
 
 // Creates an artist folder, special case formatted (The Band -> Band, The)
 int create_artist_folder(audioMetaData* meta, char* dest_dir);
