@@ -347,7 +347,6 @@ audioMetaData* get_audioMetaData_mp3(const char* filename)
     return mp3_meta;
 }
 
-
 /*
  *----------------------------------------------------------------------
  *
@@ -382,5 +381,56 @@ static void toLowerCase(char* str)
                 start++;
             }
         }
+    }
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * create_artist_folder --
+ *
+ * @brief Creates a folder for an artist, handling special cases for names starting with "The ".
+ *
+ * @param artist A pointer to the artist name for which the folder is to be created.
+ *
+ * This function generates a folder name for the given artist, considering special cases where
+ * the artist name starts with "The ". It creates a new directory with the formatted folder name.
+ * The function returns 1 on successful directory creation, and 0 otherwise.
+ *
+ *----------------------------------------------------------------------
+ */
+int create_artist_folder(audioMetaData* meta, char* dest_dir)
+{
+    char folder_name[MAX_LENGTH] = "";
+    char* artistNoTHE = NULL;
+
+    // If the artist name starts with "The ", move The to the end. (The Band -> Band, The)
+    if (strncmp(meta->artist, "The ", strlen("The ")) == 0) {
+        artistNoTHE = strchr(meta->artist, ' ') + 1;
+        int result = snprintf(folder_name, MAX_LENGTH, "%s/%s, The", dest_dir, artistNoTHE);
+
+        if (result < 0 || result >= MAX_LENGTH) {
+            fprintf(stderr, "Error formatting folder name.\n");
+            return 0;
+        }
+    } else {
+        // If the artist name doesn't start with "The ", just copy the artist name
+        int result = snprintf(folder_name, MAX_LENGTH, "%s/%s", dest_dir, meta->artist);
+
+        if (result < 0 || result >= MAX_LENGTH) {
+            fprintf(stderr, "Error formatting folder name.\n");
+            return 0;
+        }
+    }
+
+    printf("%s\n", folder_name);
+
+    // Use the mkdir function to create a new directory
+    if (mkdir(folder_name, FULL_PERMISSIONS) == 0) {
+        printf("Directory '%s' created successfully.\n", folder_name);
+        return 1;
+    } else {
+        perror("Error creating directory");
+        return 0;
     }
 }

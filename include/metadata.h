@@ -14,6 +14,8 @@
 
 #define strcasecmp _stricmp
 #define FLAC_META_VORBIS_COMMENT 4
+#define MAX_LENGTH 64
+#define FULL_PERMISSIONS 0777
 
 typedef unsigned char BYTE;
 typedef unsigned long DWORD;
@@ -50,3 +52,6 @@ audioMetaData* get_audioMetaData_mp3(const char* filename);
 
 // Converts certain words to lowercase (for use in titles, artist and album names)
 static void toLowerCase(char* str);
+
+// Creates an artist folder, special case formatted (The Band -> Band, The)
+int create_artist_folder(audioMetaData* meta, char* dest_dir);

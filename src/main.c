@@ -16,6 +16,8 @@
 #include "../include/filelist.h"
 #include "../include/metadata.h"
 
+#define print puts
+
 /*
  *----------------------------------------------------------------------
  *
@@ -77,7 +79,11 @@ int main(int argc, char* argv[])
             printf("Skipping [%s]\n\n", fileList[i]);
         }
         else {
-            print_audioMetaData(tag);
+
+            //print_audioMetaData(tag);
+            print("Everything ok so far...");
+            create_artist_folder(tag, dest_dir);
+            putc('\n', stdout);
         }
 
         // Free the dynamically allocated memory
