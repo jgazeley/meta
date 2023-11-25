@@ -12,24 +12,6 @@ int is_valid_drive_path(const char* path) {
 #endif
 }
 
-/*
- *----------------------------------------------------------------------
- *
- * setup --
- *
- * @brief    Creates/reads a configuration file and initializes the source and destination paths.
- *
- * @param    src_path   A pointer to the buffer for the source path.
- * @param    dest_path  A pointer to the buffer for the destination path.
- *
- * @return   This function reads a configuration file ('dir.ini') to set the source and destination
- *           paths. If the file doesn't exist, it creates a new one, initializes it with default values,
- *           prompts the user to set the source and destination paths, and then terminates the program.
- *           If the configuration file exists, it reads the source and destination paths from the file
- *           and updates the corresponding parameters.
- *
- *----------------------------------------------------------------------
- */
 int setup(char* src_path, char* dest_path)
 {
     FILE* cfg;

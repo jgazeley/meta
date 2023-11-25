@@ -1,22 +1,5 @@
 #include "../include/metadata.h"
 
-/*
- *----------------------------------------------------------------------
- *
- * initializeMeta --
- *
- * @brief Initializes the fields of an audioMetaData structure with default values.
- *
- * @param meta A pointer to the audioMetaData structure to be initialized.
- * @param filename The path to the associated audio file.
- *
- * This function initializes the fields of the audioMetaData structure with default values.
- * The default values include "N/A" for string fields, and 0 for integer fields in track and disc arrays.
- *
- * @return None.
- *
- *----------------------------------------------------------------------
- */
 static void initialize_audioMetaData(audioMetaData* meta, const char* filename, char* ext)
 {
     // Initialize struct member values
@@ -37,21 +20,6 @@ static void initialize_audioMetaData(audioMetaData* meta, const char* filename, 
     }
 }
 
-/*
- *----------------------------------------------------------------------
- *
- * print_audioMetaData --
- *
- * @brief Prints the members of an audioMetaData structure.
- *
- * @param meta A pointer to the audioMetaData structure to be printed.
- *
- * This function prints the fields of an audioMetaData structure.
- *
- * @return None.
- *
- *----------------------------------------------------------------------
- */
 void print_audioMetaData(audioMetaData* meta)
 {
     printf("Artist:  \t%s\n", meta->artist);
@@ -66,26 +34,8 @@ void print_audioMetaData(audioMetaData* meta)
     printf("Source file:  \t%s\n\n", meta->pathname);
 }
 
-/*
- *----------------------------------------------------------------------
- *
- * validateFlacMeta --
- *
- * @brief Validates FLAC metadata by checking for the presence of the "libFLAC" identifier.
- *
- * @param buffer A pointer to a pointer to the beginning of the FLAC metadata block buffer.
- * @param offset A pointer to an integer representing the offset within the buffer.
- * @param length The length of the FLAC metadata block.
- *
- * This function validates a FLAC metadata block by inspecting the initial string within the buffer.
- * It checks whether the "libFLAC" identifier is present, and if so, it advances the buffer pointer
- * and offset accordingly. In case of a validation failure, it prints an error message.
- *
- * @return Returns true if the metadata block is successfully validated, false otherwise.
- *
- *----------------------------------------------------------------------
- */
-static bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length) {
+static bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length)
+{
     bool result = true;
 
     // Allocate memory for the reference libFLAC identifier
@@ -108,8 +58,8 @@ static bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length) {
     return result;
 }
 
-// Function to update metadata in the file
-static void updateMetadata(struct audioMetaData* flac_meta, enum MetadataType type, const char* tagString, int totalBytes) {
+static void updateMetadata(struct audioMetaData* flac_meta, enum MetadataType type, const char* tagString, int totalBytes)
+{
     const char* tagNames[] = {"ARTIST=", "ALBUM=", "TITLE="};
     size_t tagLengths[] = {strlen("ARTIST="), strlen("ALBUM="), strlen("TITLE=")};
 
@@ -154,7 +104,8 @@ static void updateMetadata(struct audioMetaData* flac_meta, enum MetadataType ty
     }
 }
 
-static void replaceChars(char *str) {
+static void replaceChars(char *str)
+{
     while (*str) {
         if (*str == '/' || *str == '\\' || *str == '?') {
             *str = '-';
@@ -163,33 +114,12 @@ static void replaceChars(char *str) {
     }
 }
 
-/*
- *----------------------------------------------------------------------
- *
- * parseFlacMeta --
- *
- * @brief Parses FLAC metadata from a buffer and populates an audioMetaData structure.
- *
- * @param flac_meta A pointer to the audioMetaData structure to be populated.
- * @param buffer A pointer to the beginning of the FLAC metadata block buffer.
- * @param size The size of the FLAC metadata block.
- *
- * This function reads a FLAC metadata block from the given buffer, validates it using the
- * validateFlacMeta function, and assigns values to the corresponding fields of the audioMetaData
- * structure based on the recognized tags. Supported tags include "ARTIST," "ALBUM," "TITLE," "GENRE,"
- * and "DATE." Track and disc-related tags are ignored in this example. The function dynamically
- * allocates memory for tag strings during processing.
- *
- * @return Returns true if the FLAC metadata is successfully parsed and assigned to flac_meta,
- *         false otherwise.
- *
- *----------------------------------------------------------------------
- */
 static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size)
 {
-    DWORD length = 0;
-    char* tagString = NULL;
-    int totalBytes = 0;
+    DWORD length = 0;              // Stores the length of the current metadata block
+    char* tagString = NULL;        // Pointer to dynamically allocated memory for the current tag string
+    int totalBytes = 0;            // Counter for the total number of bytes processed in the metadata
+    int tagLength = 0;             // Stores the length of specific tag strings
 
     // Read 4 bytes and advance the buffer
     memcpy(&length, buffer, sizeof(DWORD));
@@ -221,7 +151,7 @@ static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size)
             updateMetadata(flac_meta, Title, tagString, totalBytes);
         }
         else 
-            int tagLength = strlen("GENRE=");
+            tagLength = strlen("GENRE=");
         if (_strnicmp(tagString, "GENRE=", tagLength) == 0) {
             strcpy(flac_meta->genre, strchr(tagString, '=') + 1);
             flac_meta->offset[Genre] = flac_meta->metaPtr + sizeof(int) + totalBytes + tagLength;
@@ -264,24 +194,6 @@ static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size)
     return true;
 }
 
-/*
- *----------------------------------------------------------------------
- *
- * get_audioMetaData_flac --
- *
- * @brief Reads FLAC metadata from a file and populates an audioMetaData structure.
- *
- * @param filename The path to the FLAC file.
- *
- * This function reads a FLAC file, verifies the FLAC header, and processes metadata blocks.
- * It allocates memory for the metadata block buffer, reads the block, and parses it using the
- * parseFlacMeta function. The resulting metadata is stored in the audioMetaData structure.
- *
- * @return A pointer to the audioMetaData structure containing the parsed metadata,
- *         or NULL if there was an error in opening the file or parsing the metadata.
- *
- *----------------------------------------------------------------------
- */
 audioMetaData* get_audioMetaData_flac(const char* filename)
 {
     audioMetaData* flac_meta = (audioMetaData*)malloc(sizeof(audioMetaData));
@@ -360,24 +272,6 @@ cleanup:
     return NULL;
 }
 
-/*
- *----------------------------------------------------------------------
- *
- * get_audioMetaData_mp3 --
- *
- * @brief Reads MP3 ID3v2 metadata from a file and populates an audioMetaData structure.
- *
- * @param filename The path to the MP3 file.
- *
- * This function reads a MP3 file, verifies the ID3 header, and processes metadata blocks.
- * It allocates memory for the metadata block buffer, reads the block, and parses it using the
- * parseMP3Meta function. The resulting metadata is stored in the audioMetaData structure.
- *
- * @return A pointer to the audioMetaData structure containing the parsed metadata,
- *         or NULL if there was an error in opening the file or parsing the metadata.
- *
- *----------------------------------------------------------------------
- */
 audioMetaData* get_audioMetaData_mp3(const char* filename)
 {
     audioMetaData* mp3_meta = (audioMetaData*)malloc(sizeof(audioMetaData));
@@ -409,24 +303,7 @@ audioMetaData* get_audioMetaData_mp3(const char* filename)
     return mp3_meta;
 }
 
-/*
- *----------------------------------------------------------------------
- *
- * toLowerCase --
- *
- * @brief Converts specific words within a string to lowercase, preserving spaces.
- *
- * @param str A pointer to the string to be converted to lowercase.
- *
- * This function iterates through a list of words and converts occurrences of those words
- * within the given string to lowercase, while preserving spaces. The function modifies
- * the input string in place.
- *
- *----------------------------------------------------------------------
- */
-#include <string.h>
-#include <ctype.h>
-
+// Convert certain words to lowercase for song titles, albums, etc.
 static int toLowerCase(char* str)
 {
     // "function words" that are converted to lowercase
@@ -454,70 +331,82 @@ static int toLowerCase(char* str)
     return conversionCount;
 }
 
-/*
- * create_artist_folder --
- *
- * @brief Creates a folder for an artist, handling special cases for names starting with "The ".
- *
- * @param artist A pointer to the artist name for which the folder is to be created.
- *
- * This function generates a folder name for the given artist, considering special cases where
- * the artist name starts with "The ". It creates a new directory with the formatted folder name.
- * The function returns 1 on successful directory creation, and 0 otherwise.
- *
- *----------------------------------------------------------------------
- */
-int create_artist_folder(audioMetaData* meta, char* dest_dir)
-{
-    char folder_name[MAX_LENGTH] = "";
-    char* artistNoTHE = NULL;
-    if (strlen(meta->artist) == 0 || strlen(meta->album) == 0) {
-        fprintf(stderr, "Error: Artist or album field is blank. ", meta->pathname);
-        return 1;
-    }
+// Function to handle error messages
+void handle_error(const char* message) {
+    fprintf(stderr, "Error: %s\n", message);
+}
 
-    // If the artist name starts with "The ", move The to the end. (The Band -> Band, The)
-    if (strncmp(meta->artist, "The ", strlen("The ")) == 0) {
-        artistNoTHE = strchr(meta->artist, ' ') + 1;
-        int result = snprintf(folder_name, MAX_LENGTH, "%s/%s, The", dest_dir, artistNoTHE);
-
-        if (result < 0 || result >= MAX_LENGTH) {
-            fprintf(stderr, "Error formatting folder name 1. ");
-            return 0;
-        }
-    } else {
-        // If the artist name doesn't start with "The ", just copy the artist name
-        int result = snprintf(folder_name, MAX_LENGTH, "%s/%s", dest_dir, meta->artist);
-
-        if (result < 0 || result >= MAX_LENGTH) {
-            fprintf(stderr, "Error formatting folder name 2. ");
-            return 0;
-        }
+// Function to create the artist folder
+bool create_artist_folder(const char* dest_dir, const char* artist, char* folder_name) {
+    int result = snprintf(folder_name, MAX_LENGTH, "%s/%s", dest_dir, artist);
+    if (result < 0 || result >= MAX_LENGTH) {
+        handle_error("Error formatting artist folder name");
+        return false;
     }
 
     // Check if the artist folder already exists
     if (_access(folder_name, 0) == -1) {
-         // Use the _mkdir function to create a new directory
         if (_mkdir(folder_name) != 0) {
-            perror("Error creating directory");
-            return 1;
+            perror("Error creating artist directory");
+            return false;
         }
     }
 
-    strcat(folder_name, "/"); strcat(folder_name, meta->album);
-    // Check if the album folder already exists
+    return true;
+}
+
+// Function to create the album folder
+bool create_album_folder(const char* dest_dir, const char* artist, const char* album, char* folder_name) {
+    int result = snprintf(folder_name, MAX_LENGTH, "%s/%s/%s", dest_dir, artist, album);
+    if (result < 0 || result >= MAX_LENGTH) {
+        handle_error("Error formatting album folder name");
+        return false;
+    }
+
     if (_access(folder_name, 0) == -1) {
-         // Use the _mkdir function to create a new directory
         if (_mkdir(folder_name) != 0) {
-            perror("Error creating directory");
-            return 1;
+            perror("Error creating album directory");
+            return false;
         }
     }
 
-    // Reformat the file name and path
+    return true;
+}
+
+// Function to reformat the file name and path
+void reformat_file_path(audioMetaData* meta, const char* folder_name) {
     if (strchr(meta->title, '/') || strchr(meta->title, '\\') || strchr(meta->title, '?')) {
+        // Assuming replaceChars is a function that replaces specific characters in a string
         replaceChars(meta->title);
     }
     sprintf(meta->pathname, "%s/%02d. %s.%s", folder_name, meta->track[0], meta->title, meta->fileext);
-    return 0;
+}
+
+// Function to create the album folder structure
+bool create_folder_structure(audioMetaData* meta, const char* dest_dir) {
+    char folder_name[MAX_LENGTH] = "";
+
+    if (strlen(meta->artist) == 0 || strlen(meta->album) == 0) {
+        handle_error("Artist or album field is blank");
+        return false;
+    }
+
+    // If the artist name starts with "The ", move "The" to the end.
+    if (strncmp(meta->artist, "The ", strlen("The ")) == 0) {
+        char temp[MAX_LENGTH];
+        snprintf(temp, MAX_LENGTH, "%s, The", meta->artist + strlen("The "));
+        strcpy(meta->artist, temp);
+    }
+
+    if (!create_artist_folder(dest_dir, meta->artist, folder_name)) {
+        return false;
+    }
+
+    if (!create_album_folder(dest_dir, meta->artist, meta->album, folder_name)) {
+        return false;
+    }
+
+    reformat_file_path(meta, folder_name);
+
+    return true;
 }
