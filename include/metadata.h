@@ -20,7 +20,7 @@
 
 #define strcasecmp _stricmp
 #define FLAC_META_VORBIS_COMMENT 4
-#define MAX_LENGTH 64
+#define MAX_LENGTH 128
 #define FULL_PERMISSIONS 0777
 
 typedef unsigned char BYTE;
@@ -29,7 +29,7 @@ typedef unsigned long DWORD;
 typedef struct audioMetaData {
     char pathname[_MAX_PATH];
     char fileext[10];
-    char artist[32];
+    char artist[64];
     char album[128];
     char title[128];
     char date[5];
@@ -60,6 +60,7 @@ void print_audioMetaData(audioMetaData* meta);
 
 // Helper functions to validate FLAC metadata
 static bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length);
+static void updateMetadata(struct audioMetaData* flac_meta, enum MetadataType type, const char* tagString, int totalBytes);
 static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size);
 
 // Functions to read FLAC/MP3 file and populate metadata

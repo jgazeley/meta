@@ -17,7 +17,6 @@
 #include "../include/metadata.h"
 
 #define print puts
-#define NEWLINE putc('\n', stdout);
 
 /*
  *----------------------------------------------------------------------
@@ -77,7 +76,8 @@ int main(int argc, char* argv[])
             meta = get_audioMetaData_flac(fileList[i]);
         }
         else if (!strcmp(ftype, "mp3")) {
-            meta = get_audioMetaData_mp3(fileList[i]);
+            printf("Error: mp3 not yet implemented. ");
+            //meta = get_audioMetaData_mp3(fileList[i]);
         }
         else printf("Error: Unsupported file type *.%s. ", ftype);
 
@@ -93,10 +93,12 @@ int main(int argc, char* argv[])
         } else {
             // copy the new pathname from the struct 
             strcpy(newPath, meta->pathname);
-            rename(oldPath, newPath);
+            if (rename(oldPath, newPath) == -1) {
+                printf("%s ", fileList[i]);
+                perror("could not be renamed");
+                return 1;
+            }
         }
-
-        NEWLINE
 
         // Free the dynamically allocated memory
         free(meta);
