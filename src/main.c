@@ -47,6 +47,7 @@ int main(int argc, char* argv[])
     char** fileList = NULL;                         // list of files (of ftype)
     int fcount = 0;                                 // number of files (of ftype)
     int folderFailed = 0;                           // indicates a folder couldn't be created
+    int successCount= 0;
     audioMetaData* meta = NULL;                     // struct containing audio file metadata
 
     // Check command line arguments
@@ -66,6 +67,9 @@ int main(int argc, char* argv[])
     // Get a list of the file names in 'src_dir' with extension 'ftype'
     //fileList = get_filenames(src_dir, &fcount, ftype);l
     fileList = get_filenames(src_dir, &fcount);
+    printf("File List:\n");
+    print_filenames(fileList, fcount);
+    printf("\nResults:\n");
 
     // Read metadata
     for (int i = 0; i < fcount; i++)
@@ -96,15 +100,15 @@ int main(int argc, char* argv[])
             if (rename(oldPath, newPath) == -1) {
                 printf("%s ", fileList[i]);
                 perror("could not be renamed");
-                return 1;
+            } else {
+            printf("%s processed successfully.\n", fileList[i]);
+            successCount++;
             }
         }
 
         // Free the dynamically allocated memory
         free(meta);
     }
-
-    print_filenames(fileList, fcount);
 
     // Free allocated memory for each file name
     for (int i = 0; i < fcount; i++) {
@@ -113,7 +117,8 @@ int main(int argc, char* argv[])
     // Free memory for the array of strings
     free(fileList);
 
-    printf("Program complete.\n");
+    printf("%d files processed successfully,", successCount);
+    printf(" %d files failed.\n\n", fcount - successCount);
 
     return 0;
 }

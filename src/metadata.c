@@ -154,6 +154,15 @@ static void updateMetadata(struct audioMetaData* flac_meta, enum MetadataType ty
     }
 }
 
+static void replaceChars(char *str) {
+    while (*str) {
+        if (*str == '/' || *str == '\\' || *str == '?') {
+            *str = '-';
+        }
+        str++;
+    }
+}
+
 /*
  *----------------------------------------------------------------------
  *
@@ -506,6 +515,9 @@ int create_artist_folder(audioMetaData* meta, char* dest_dir)
     }
 
     // Reformat the file name and path
+    if (strchr(meta->title, '/') || strchr(meta->title, '\\') || strchr(meta->title, '?')) {
+        replaceChars(meta->title);
+    }
     sprintf(meta->pathname, "%s/%02d. %s.%s", folder_name, meta->track[0], meta->title, meta->fileext);
     return 0;
 }

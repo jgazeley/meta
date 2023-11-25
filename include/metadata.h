@@ -61,6 +61,7 @@ void print_audioMetaData(audioMetaData* meta);
 // Helper functions to validate FLAC metadata
 static bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length);
 static void updateMetadata(struct audioMetaData* flac_meta, enum MetadataType type, const char* tagString, int totalBytes);
+static void replaceChars(char *str);
 static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size);
 
 // Functions to read FLAC/MP3 file and populate metadata

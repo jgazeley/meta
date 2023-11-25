@@ -102,15 +102,18 @@ void print_filenames(char* fileList[], int fcount)
 {
     for (int i = 0; i < fcount; i++) {
         printf("File #%2d | %s\n", i, fileList[i]);
-    }
-    putc('\n', stdout);    
+    }   
 }
 
-// Test
-// int main()
-// {
+
+// int main(int argc, char* argv[]) {
+//     if (argc != 2) {
+//         printf("Usage: %s <path>\n", argv[0]);
+//         return 1;
+//     }
+
 //     int count = 0;
-//     char* src = "C:\\Users\\Jayson\\Desktop";
+//     char* src = argv[1];
 //     char** list = get_filenames(src, &count);
 //     print_filenames(list, count);
 
