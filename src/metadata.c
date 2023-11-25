@@ -31,6 +31,10 @@ static void initialize_audioMetaData(audioMetaData* meta, const char* filename, 
         meta->track[i] = 0;
         meta->disc[i] = 0;
     }
+    meta->metaPtr = 0;
+    for (int i = 0; i < 9; i++) {
+        meta->offset[i] = 0;
+    }
 }
 
 /*
@@ -154,23 +158,82 @@ static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size)
         tagString[length] = '\0';  // Null terminate the string
 
         // Check for the specific tags and assign values to variables accordingly
-        if (_strnicmp(tagString, "ARTIST=", strlen("ARTIST=")) == 0) {
+        int tagLength = strlen("ARTIST=");
+        if (_strnicmp(tagString, "ARTIST=", tagLength) == 0) {
             strcpy(flac_meta->artist, strchr(tagString, '=') + 1);
-            toLowerCase(flac_meta->artist);
+            if (toLowerCase(flac_meta->artist)) {
+                flac_meta->offset[Artist] = flac_meta->metaPtr + sizeof(int) + totalBytes + tagLength;
+                FILE* file;
+                if (!(file = fopen(flac_meta->pathname, "r+"))) {
+                    perror("Error opening file");
+                } else {
+                    if (fseek(file, flac_meta->offset[Artist], SEEK_SET) != 0) {
+                        perror("Error seeking file");
+                    } else {
+                        size_t artistLength = strlen(flac_meta->artist);
+                        if (fwrite(flac_meta->artist, sizeof(char), artistLength, file) != artistLength) {
+                            perror("Error writing artist to file");
+                        }
+                    }
+                    fclose(file);
+                }
+            }
         }
-        else if (_strnicmp(tagString, "ALBUM=", 6) == 0) {
+        else
+        tagLength = strlen("ALBUM=");
+        if (_strnicmp(tagString, "ALBUM=", tagLength) == 0) {
             strcpy(flac_meta->album, strchr(tagString, '=') + 1);
-            toLowerCase(flac_meta->album);
+            if (toLowerCase(flac_meta->album)) {
+                flac_meta->offset[Album] = flac_meta->metaPtr + sizeof(int) + totalBytes + tagLength;
+                FILE* file;
+                if (!(file = fopen(flac_meta->pathname, "r+"))) {
+                    perror("Error opening file");
+                } else {
+                    if (fseek(file, flac_meta->offset[Album], SEEK_SET) != 0) {
+                        perror("Error seeking file");
+                    } else {
+                        size_t albumLength = strlen(flac_meta->album);
+                        if (fwrite(flac_meta->album, sizeof(char), albumLength, file) != albumLength) {
+                            perror("Error writing album to file");
+                        }
+                    }
+                    fclose(file);
+                }
+            }
         }
-        else if (_strnicmp(tagString, "TITLE=", 6) == 0) {
+        else
+        tagLength = strlen("TITLE=");
+        if (_strnicmp(tagString, "TITLE=", tagLength) == 0) {
             strcpy(flac_meta->title, strchr(tagString, '=') + 1);
-            toLowerCase(flac_meta->title);
+            if (toLowerCase(flac_meta->title)) {
+                flac_meta->offset[Title] = flac_meta->metaPtr + sizeof(int) + totalBytes + tagLength;
+                FILE* file;
+                if (!(file = fopen(flac_meta->pathname, "r+"))) {
+                    perror("Error opening file");
+                } else {
+                    if (fseek(file, flac_meta->offset[Title], SEEK_SET) != 0) {
+                        perror("Error seeking file");
+                    } else {
+                        size_t titleLength = strlen(flac_meta->title);
+                        if (fwrite(flac_meta->title, sizeof(char), titleLength, file) != titleLength) {
+                            perror("Error writing title to file");
+                        }
+                    }
+                    fclose(file);
+                }
+            }
         }
-        else if (_strnicmp(tagString, "GENRE=", 6) == 0) {
+        else
+        tagLength = strlen("GENRE=");
+        if (_strnicmp(tagString, "GENRE=", tagLength) == 0) {
             strcpy(flac_meta->genre, strchr(tagString, '=') + 1);
+            flac_meta->offset[Genre] = flac_meta->metaPtr + sizeof(int) + totalBytes + tagLength;
         }
-        else if (_strnicmp(tagString, "DATE=", 5) == 0) {
+        else
+        tagLength = strlen("DATE=");
+        if (_strnicmp(tagString, "DATE=", tagLength) == 0) {
             strcpy(flac_meta->date, strchr(tagString, '=') + 1);
+            flac_meta->offset[Date] = flac_meta->metaPtr + sizeof(int) + totalBytes + tagLength;
         }
         else if (_strnicmp(tagString, "TRACKNUMBER=", 12) == 0 ||
             _strnicmp(tagString, "TRACKTOTAL=", 11) == 0 ||
@@ -262,6 +325,8 @@ audioMetaData* get_audioMetaData_flac(const char* filename)
         int blockSize = (header[1] << 16) | (header[2] << 8) | header[3];
 
         if (blockType == FLAC_META_VORBIS_COMMENT) {
+            // Track the offset of the comment block
+            flac_meta->metaPtr = ftell(file);
             // Allocate buffer for metadata block
             if (!(buffer = (BYTE*)malloc(blockSize))) {
                 goto cleanup;
@@ -362,13 +427,18 @@ audioMetaData* get_audioMetaData_mp3(const char* filename)
  *
  *----------------------------------------------------------------------
  */
-static void toLowerCase(char* str)
+#include <string.h>
+#include <ctype.h>
+
+static int toLowerCase(char* str)
 {
     // "function words" that are converted to lowercase
     char* words[] = {
         " In ", " Is ", " The ", " With ", " A ", " As ", " At ",
         " And ", " For ", " From ", " To ", " Or ", " Of ", " On "
     };
+
+    int conversionCount = 0;  // Counter for the number of conversions
 
     // Iterate through each word and convert to lowercase
     for (int i = 0; i < sizeof(words) / sizeof(char*); i++) {
@@ -380,20 +450,11 @@ static void toLowerCase(char* str)
                 *start = tolower(*start);
                 start++;
             }
+            conversionCount = 1;  // Set the flag to indicate at least one conversion
         }
     }
-}
 
-int is_valid_drive_path(const char* path) {
-#ifdef _WIN32
-    // Check for Windows drive letter and colon followed by optional backslash or forward slash
-    return (isalpha(path[0]) && path[1] == ':' && (path[2] == '\0' || path[2] == '/' || path[2] == '\\'));
-#else
-    // Add Unix/Linux path validation if needed
-    // For Unix/Linux, you might want to check for a leading slash '/'
-    // For simplicity, this example assumes a relative path is valid
-    return 1; // Always return true for non-Windows platforms in this example
-#endif
+    return conversionCount;
 }
 
 /*
@@ -409,23 +470,12 @@ int is_valid_drive_path(const char* path) {
  *
  *----------------------------------------------------------------------
  */
-int create_artist_folder(audioMetaData* meta, char* dest_dir) {
-    // Check if dest_dir is a valid drive path
-    if (!is_valid_drive_path(dest_dir)) {
-        fprintf(stderr, "Error (dir.ini): The destination directory '%s' is not a valid drive path.\n", dest_dir);
-        return 1;
-    }
-
-    // Check if dest_dir is a valid directory with read and write permissions
-    if (_access(dest_dir, 4) != 0 || _access(dest_dir, 2) != 0) {
-        fprintf(stderr, "Error (dir.ini): The destination directory '%s' is not a valid directory or does not have read and write permissions.\n", dest_dir);
-        return 1;
-    }
-
+int create_artist_folder(audioMetaData* meta, char* dest_dir)
+{
     char folder_name[MAX_LENGTH] = "";
     char* artistNoTHE = NULL;
     if (strlen(meta->artist) == 0 ) {
-        printf("Error (%s): Artist field is blank.\n", meta->pathname);
+        fprintf(stderr, "Error: Artist field is blank. ", meta->pathname);
         return 1;
     }
 
@@ -435,7 +485,7 @@ int create_artist_folder(audioMetaData* meta, char* dest_dir) {
         int result = snprintf(folder_name, MAX_LENGTH, "%s/%s, The", dest_dir, artistNoTHE);
 
         if (result < 0 || result >= MAX_LENGTH) {
-            fprintf(stderr, "Error formatting folder name.\n");
+            fprintf(stderr, "Error formatting folder name. ");
             return 0;
         }
     } else {
@@ -443,14 +493,17 @@ int create_artist_folder(audioMetaData* meta, char* dest_dir) {
         int result = snprintf(folder_name, MAX_LENGTH, "%s/%s", dest_dir, meta->artist);
 
         if (result < 0 || result >= MAX_LENGTH) {
-            fprintf(stderr, "Error formatting folder name.\n");
+            fprintf(stderr, "Error formatting folder name. ");
             return 0;
         }
     }
 
+    // Reformat the file name and path
+    sprintf(meta->pathname, "%s/%02d. %s.%s", folder_name, meta->track[0], meta->title, meta->fileext);
+
     // Check if the folder already exists
     if (_access(folder_name, 0) == 0) {
-        printf("Directory '%s' already exists. Skipping creation.\n", folder_name);
+        //printf("Directory '%s' already exists.\n", folder_name);
         return 0;
     }
 

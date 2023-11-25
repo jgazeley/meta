@@ -1,24 +1,20 @@
-#ifndef STDIO_H
-#define STDIO_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
 #include <stdio.h>
-
-#endif
-
-#ifndef STDLIB_H
-#define STDLIB_H
-
 #include <stdlib.h>
-
-#endif
-
-#ifndef STRING_H
-#define STRING_H
-
 #include <string.h>
 
+#ifdef _WIN32
+#include <direct.h>
+#include <io.h>
+#else
+#include <unistd.h>
 #endif
+
+#endif // CONFIG_H
 
 #define MAX_CMD 64
 
-void setup(char* src_path, char* dest_path);
+int is_valid_drive_path(const char* path);
+int setup(char* src_path, char* dest_path);

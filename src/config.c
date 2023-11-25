@@ -1,5 +1,17 @@
 #include "../include/config.h"
 
+int is_valid_drive_path(const char* path) {
+#ifdef _WIN32
+    // Check for Windows drive letter and colon followed by optional backslash or forward slash
+    return (isalpha(path[0]) && path[1] == ':' && (path[2] == '\0' || path[2] == '/' || path[2] == '\\'));
+#else
+    // Add Unix/Linux path validation if needed
+    // For Unix/Linux, you might want to check for a leading slash '/'
+    // For simplicity, this example assumes a relative path is valid
+    return 1; // Always return true for non-Windows platforms in this example
+#endif
+}
+
 /*
  *----------------------------------------------------------------------
  *
@@ -18,7 +30,7 @@
  *
  *----------------------------------------------------------------------
  */
-void setup(char* src_path, char* dest_path)
+int setup(char* src_path, char* dest_path)
 {
     FILE* cfg;
     const char* config = "dir.ini";
@@ -31,7 +43,7 @@ void setup(char* src_path, char* dest_path)
         printf("Configuration file doesn't exist. Creating...\n");
         if (!(cfg = fopen(config, "wb"))) {
             printf("Error creating file!\n");
-            exit(1);
+            return 1;
         }
 
         // Initialize configuration file
@@ -43,7 +55,7 @@ void setup(char* src_path, char* dest_path)
         // Open configuration file in notepad and terminate this program
         sprintf(cmd, "notepad %s", config);
         system(cmd);
-        exit(1);
+        return 1;
     }
 
     // Read source and destination path from the config file
@@ -52,7 +64,19 @@ void setup(char* src_path, char* dest_path)
             strcpy(src_path, strchr(line, '=') + 1);
             len = strlen(src_path);
             if (len > 0 && src_path[len - 1] == '\n')
-                src_path[len - 1] = '\0';
+                src_path[len - 1] = '\0';            
+        
+            // Check if dest_dir is a valid drive path
+            if (!is_valid_drive_path(src_path)) {
+                fprintf(stderr, "Error (dir.ini): The source directory '%s' is not a valid drive path.\n", src_path);
+                return 1;
+            }
+
+            // Check if dest_dir is a valid directory with read and write permissions
+            if (_access(src_path, 4) != 0 || _access(src_path, 2) != 0) {
+                fprintf(stderr, "Error (dir.ini): The source directory '%s' is not a valid directory or does not have read and write permissions.\n", src_path);
+                return 1;
+            }
         }
 
         if (!strncmp(line, "Destination=", strlen("Destination="))) {
@@ -60,8 +84,21 @@ void setup(char* src_path, char* dest_path)
             len = strlen(dest_path);
             if (len > 0 && dest_path[len - 1] == '\n')
                 dest_path[len - 1] = '\0';
+
+            // Check if dest_dir is a valid drive path
+            if (!is_valid_drive_path(dest_path)) {
+                fprintf(stderr, "Error (dir.ini): The destination directory '%s' is not a valid drive path.\n", dest_path);
+                return 1;
+            }
+
+            // Check if dest_dir is a valid directory with read and write permissions
+            if (_access(dest_path, 4) != 0 || _access(dest_path, 2) != 0) {
+                fprintf(stderr, "Error (dir.ini): The destination directory '%s' is not a valid directory or does not have read and write permissions.\n", dest_path);
+                return 1;
+            }
         }
     } fclose(cfg);
+    return 0;
 }
 
 // Test

@@ -14,7 +14,6 @@
 #ifdef _WIN32
 #include <direct.h>
 #include <io.h>
-#define access _access
 #else
 #include <unistd.h>
 #endif
@@ -37,7 +36,21 @@ typedef struct audioMetaData {
     char genre[32];
     int track[2];
     int disc[2];
+    int metaPtr;
+    int offset[9];      // enum MetadataField is for the index of this array
 } audioMetaData;
+
+typedef enum {
+    Artist,       // 0
+    Album,        // 1
+    Title,        // 2
+    Date,         // 3
+    Genre,        // 4
+    TrackNumber,  // 5
+    TotalTracks,  // 6
+    DiscNumber,   // 7
+    TotalDiscs    // 8
+} MetadataField;
 
 // Function to initialize audio metadata structure
 static void initialize_audioMetaData(audioMetaData* meta, const char* filename, char* ext);
@@ -45,23 +58,16 @@ static void initialize_audioMetaData(audioMetaData* meta, const char* filename, 
 // Display the members of an audioMetaData struct
 void print_audioMetaData(audioMetaData* meta);
 
-// Helper function to validate FLAC metadata
+// Helper functions to validate FLAC metadata
 static bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length);
-
-// Helper function to parse FLAC metadata
 static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size);
 
-// Function to read FLAC file and populate metadata
+// Functions to read FLAC/MP3 file and populate metadata
 audioMetaData* get_audioMetaData_flac(const char* filename);
-
-// Function to read MP3 file and populate metadata
 audioMetaData* get_audioMetaData_mp3(const char* filename);
 
 // Converts certain words to lowercase (for use in titles, artist and album names)
-static void toLowerCase(char* str);
-
-// Check for Windows drive letter and colon followed by optional backslash or forward slash
-int is_valid_drive_path(const char* path);
+static int toLowerCase(char* str);
 
 // Creates an artist folder, special case formatted (The Band -> Band, The)
 int create_artist_folder(audioMetaData* meta, char* dest_dir);

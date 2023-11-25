@@ -17,6 +17,7 @@
 #include "../include/metadata.h"
 
 #define print puts
+#define NEWLINE putc('\n', stdout);
 
 /*
  *----------------------------------------------------------------------
@@ -38,13 +39,16 @@
  */
 int main(int argc, char* argv[])
 {
-    printf("Program Start...\n\n");
     const char* program_name = argv[0];
     char* ftype = NULL;                             // file extension
     char src_dir[_MAX_PATH] = "";                   // source folder
     char dest_dir[_MAX_PATH] = "";                  // destination folder
+    char oldPath[_MAX_PATH] = "";                   // temporary string containing old file path
+    char newPath[_MAX_PATH] = "";                   // destination directory with reformatted file name
     char** fileList = NULL;                         // list of files (of ftype)
     int fcount = 0;                                 // number of files (of ftype)
+    int folderFailed = 0;                           // indicates a folder couldn't be created
+    audioMetaData* meta = NULL;                     // struct containing audio file metadata
 
     // Check command line arguments
     if (argc != 1) {
@@ -55,7 +59,10 @@ int main(int argc, char* argv[])
     //ftype = argv[1];
 
     // Read configuration file / initial setup
-    setup(src_dir, dest_dir);
+    if (setup(src_dir, dest_dir) != 0) {
+        printf("Setup failed!\n");
+        return 1;
+    }
 
     // Get a list of the file names in 'src_dir' with extension 'ftype'
     //fileList = get_filenames(src_dir, &fcount, ftype);l
@@ -64,28 +71,35 @@ int main(int argc, char* argv[])
     // Read metadata
     for (int i = 0; i < fcount; i++)
     {
-        audioMetaData* tag = NULL;
+        meta = NULL;
         ftype = strrchr(fileList[i], '.') + 1;
         if (!strcmp(ftype, "flac")) {
-            tag = get_audioMetaData_flac(fileList[i]);
+            meta = get_audioMetaData_flac(fileList[i]);
         }
         else if (!strcmp(ftype, "mp3")) {
-            tag = get_audioMetaData_mp3(fileList[i]);
+            meta = get_audioMetaData_mp3(fileList[i]);
         }
-        else
-            printf("Error: Unsupported file type *.%s. ", ftype);
+        else printf("Error: Unsupported file type *.%s. ", ftype);
 
-        if (tag == NULL) {
-            printf("Skipping [%s]\n\n", fileList[i]);
+        if (meta != NULL) {
+            // copy the old pathname from the struct
+            strcpy(oldPath, meta->pathname);
+            // meta->pathname is modified by create_artist_folder()
+            folderFailed = create_artist_folder(meta, dest_dir);
         }
-        else {
-            printf("%s\n", fileList[i]);
-            create_artist_folder(tag, dest_dir);
-            putc('\n', stdout);
+
+        if (meta == NULL || folderFailed == 1) {
+            printf("Skipping [%s]\n", fileList[i]);
+        } else {
+            // copy the new pathname from the struct 
+            strcpy(newPath, meta->pathname);
+            rename(oldPath, newPath);
         }
+
+        NEWLINE
 
         // Free the dynamically allocated memory
-        free(tag);
+        free(meta);
     }
 
     print_filenames(fileList, fcount);
