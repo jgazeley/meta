@@ -150,18 +150,17 @@ static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size)
         } else if (_strnicmp(tagString, "TITLE=", strlen("TITLE=")) == 0) {
             updateMetadata(flac_meta, Title, tagString, totalBytes);
         }
-        else 
-            tagLength = strlen("GENRE=");
+
+        tagLength = strlen("GENRE=");
         if (_strnicmp(tagString, "GENRE=", tagLength) == 0) {
             strcpy(flac_meta->genre, strchr(tagString, '=') + 1);
-            flac_meta->offset[Genre] = flac_meta->metaPtr + sizeof(int) + totalBytes + tagLength;
         }
-        else
-            tagLength = strlen("DATE=");
+
+        tagLength = strlen("DATE=");
         if (_strnicmp(tagString, "DATE=", tagLength) == 0) {
             strcpy(flac_meta->date, strchr(tagString, '=') + 1);
-            flac_meta->offset[Date] = flac_meta->metaPtr + sizeof(int) + totalBytes + tagLength;
         }
+
         else if (_strnicmp(tagString, "TRACKNUMBER=", 12) == 0 ||
             _strnicmp(tagString, "TRACKTOTAL=", 11) == 0 ||
             _strnicmp(tagString, "TRACK=", 6) == 0 ||

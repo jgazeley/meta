@@ -87,6 +87,7 @@ void process_file(char* filename, const char* dest_dir, int* successCount)
     }
 
     free(meta);
+    free(filename);
 }
 
 // Function to print the summary
