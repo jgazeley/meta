@@ -44,7 +44,6 @@ main(argc, argv)
     return 0;
 }
 
-// Function to process each file
 void
 process_file(filename, dest_dir, successCount)
     char* filename;
@@ -61,10 +60,10 @@ process_file(filename, dest_dir, successCount)
     if (!strcmp(ftype, "flac")) {
         meta = get_audioMetaData_flac(filename);
     } else if (!strcmp(ftype, "mp3")) {
-        handle_error("Error: mp3 not yet implemented. ");
+        handle_error("mp3 not yet implemented.");
         // meta = get_audioMetaData_mp3(filename);
     } else {
-        fprintf(stderr, "Error: Unsupported file type *.%s. ", ftype);
+        handle_error("Unsupported file type.");
     }
 
     // procedure if meta contains metadata
@@ -78,14 +77,13 @@ process_file(filename, dest_dir, successCount)
 
     // skip if a file contains no metadata or folder creation fails
     if (meta == NULL || !mkdir_success) {
-        printf("Skipping [%s]\n", filename);
+        printf("[%s]\n", filename);
     } else {
         // copy the new pathname from the struct after modification
         strcpy(newPath, meta->pathname);
 
         if (rename(oldPath, newPath) == -1) {
-            printf("%s ", filename);
-            perror("could not be renamed");
+            perror("Error : File could not be renamed");
         } else {
             // count and print files that did not fail
             printf("%s processed successfully.\n", newPath);
@@ -97,12 +95,11 @@ process_file(filename, dest_dir, successCount)
     free(filename);
 }
 
-// Function to print the summary
 void
 print_summary(successCount, totalFiles)
     int successCount;
     int totalFiles;
 {
-    printf("%d files processed successfully,", successCount);
+    printf("\n%d files processed successfully,", successCount);
     printf(" %d files failed.\n\n", totalFiles - successCount);
 }

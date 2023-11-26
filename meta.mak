@@ -3,13 +3,13 @@ CC = cl
 LINK = link
 
 # Compiler and linker flags
-CFLAGS = /nologo /MD /I D:\Desktop\meta\include
+CFLAGS = /nologo /MD /I D:\Programs\C\meta\include
 LDFLAGS = /nologo
 
 # Source and object directories
-SRC_DIR = D:\Desktop\meta\src
-OBJ_DIR = D:\Desktop\meta\build
-BIN_DIR = D:\Desktop\meta
+SRC_DIR = D:\Programs\C\meta\src
+OBJ_DIR = D:\Programs\C\meta\build
+BIN_DIR = D:\Programs\C\meta
 
 # List of source files
 SOURCES = $(SRC_DIR)\main.c $(SRC_DIR)\metadata.c $(SRC_DIR)\config.c $(SRC_DIR)\filelist.c

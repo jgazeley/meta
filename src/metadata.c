@@ -103,14 +103,14 @@ updateMetadata(flac_meta, type, tagString, totalBytes)
 
             FILE* file;
             if (!(file = fopen(flac_meta->pathname, "r+"))) {
-                perror("Error opening file");
+                perror("Error : Couln't open file");
             } else {
                 if (fseek(file, flac_meta->offset[type], SEEK_SET) != 0) {
-                    perror("Error seeking file");
+                    perror("Error : Couldn't seek file");
                 } else {
                     size_t fieldLength = strlen(targetField);
                     if (fwrite(targetField, sizeof(char), fieldLength, file) != fieldLength) {
-                        perror("Error writing metadata to file");
+                        perror("Error : Couldn't write metadata to file");
                     }
                 }
                 fclose(file);
@@ -227,14 +227,14 @@ get_audioMetaData_flac(filename)
 
     // Open the FLAC file for reading
     if (!(file = fopen(filename, "rb"))) {
-        perror("Error opening file");
+        perror("Error : Couldn't open the file");
         return NULL;
     }
 
     // Check if the first 4 bytes are 'fLaC' indicating a valid flac file
     bytesRead = fread(header, sizeof(BYTE), 4, file);
     if (bytesRead < 4 || memcmp(header, "fLaC", 4) != 0) {
-        printf("Error: Not a real FLAC file. ");
+        handle_error("Not a real FLAC file.");
         goto cleanup;
     }
 
@@ -246,7 +246,7 @@ get_audioMetaData_flac(filename)
     while (!finalBlock) {
         bytesRead = fread(header, sizeof(BYTE), 4, file);
         if (bytesRead < sizeof(int)) {
-            printf("Error: Data missing or corrupt. ");
+            handle_error("Data missing or corrupt.");
             goto cleanup;
         }
 
@@ -266,12 +266,12 @@ get_audioMetaData_flac(filename)
             // Read metadata block into the buffer
             bytesRead = fread(buffer, sizeof(BYTE), blockSize, file);
             if (bytesRead < blockSize) {
-                printf("Error: Couldn't read tag info. ");
+                handle_error("Couldn't read tag info.");
                 goto cleanup;
             }
 
             if (!(parseFlacMeta(flac_meta, buffer, blockSize))) {
-                printf("FLAC file could not be parsed.");
+                handle_error("FLAC file could not be parsed.");
                 goto cleanup;
             }
 
@@ -314,7 +314,7 @@ get_audioMetaData_mp3(filename)
     // Check if the first 3 bytes are 'ID3' indicating an mp3 file with ID3 tags
     fread(header, sizeof(BYTE), 10, file);
     if (memcmp(header, "ID3", 3) != 0) {
-        printf("Error: Not an ID3v2 mp3 file. ");
+        handle_error("Not an ID3v2 mp3 file.");
         fclose(file);
         free(mp3_meta);
         return NULL;
@@ -360,7 +360,7 @@ void
 handle_error(message)
     const char* message;
 {
-    fprintf(stderr, "Error: %s\n", message);
+    fprintf(stderr, "Error : %-30s ", message);
 }
 
 bool
@@ -371,14 +371,14 @@ create_artist_folder(dest_dir, artist, folder_name)
 {
     int result = snprintf(folder_name, MAX_LENGTH, "%s/%s", dest_dir, artist);
     if (result < 0 || result >= MAX_LENGTH) {
-        handle_error("Error formatting artist folder name");
+        handle_error("Couldn't format the artist folder name");
         return false;
     }
 
     // Check if the artist folder already exists
     if (_access(folder_name, 0) == -1) {
         if (_mkdir(folder_name) != 0) {
-            perror("Error creating artist directory");
+            perror("Error : Couldn't create artist directory");
             return false;
         }
     }
@@ -395,13 +395,13 @@ create_album_folder(dest_dir, artist, album, folder_name)
 {
     int result = snprintf(folder_name, MAX_LENGTH, "%s/%s/%s", dest_dir, artist, album);
     if (result < 0 || result >= MAX_LENGTH) {
-        handle_error("Error formatting album folder name");
+        handle_error("Couldn't format the album folder name");
         return false;
     }
 
     if (_access(folder_name, 0) == -1) {
         if (_mkdir(folder_name) != 0) {
-            perror("Error creating album directory");
+            perror("Error : Couldn't create album directory");
             return false;
         }
     }
@@ -429,7 +429,7 @@ create_folder_structure(meta, dest_dir)
     char folder_name[MAX_LENGTH] = "";
 
     if (strlen(meta->artist) == 0 || strlen(meta->album) == 0) {
-        handle_error("Artist or album field is blank");
+        handle_error("A field is blank.");
         return false;
     }
 
