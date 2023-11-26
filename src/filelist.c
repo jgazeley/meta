@@ -1,6 +1,11 @@
 #include "../include/filelist.h"
 
-char** get_filenames(char* path, int* count/*, const char* ext*/) {
+char**
+get_filenames(path, count/*, ext*/)
+    char* path;
+    int* count;
+    // const char* ext;
+{
     DIR* dir;
     struct dirent* entry;
     // char* extension = NULL;
@@ -63,12 +68,17 @@ char** get_filenames(char* path, int* count/*, const char* ext*/) {
     return fileList;
 }
 
-// Function to get the file extension
-char* get_file_extension(const char* filename) {
+char*
+get_file_extension(filename)
+    const char* filename;
+{
     return strrchr(filename, '.') + 1;
 }
 
-void print_filenames(char* fileList[], int fcount)
+void
+print_filenames(fileList, fcount)
+    char* fileList[];
+    int fcount;
 {
     for (int i = 0; i < fcount; i++) {
         printf("File #%2d | %s\n", i, fileList[i]);

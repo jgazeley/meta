@@ -25,7 +25,8 @@
  * @param path The path to be validated.
  * @return 1 if the path is valid, 0 otherwise.
  */
-int is_valid_drive_path(const char* path);
+int
+is_valid_drive_path(const char* path);
 
 
 /**
@@ -39,4 +40,5 @@ int is_valid_drive_path(const char* path);
  * @param dest_path Buffer to store the destination path.
  * @return 0 on success, 1 on error.
  */
-int setup(char* src_path, char* dest_path);
+int
+setup(char* src_path, char* dest_path);

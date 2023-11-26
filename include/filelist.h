@@ -26,7 +26,8 @@
  * @param count Pointer to an integer to store the count of filenames.
  * @return An array of strings containing the filenames.
  */
-char** get_filenames(char* path, int* count/*, const char* ext*/);
+char**
+get_filenames(char* path, int* count/*, const char* ext*/);
 
 
 /**
@@ -41,8 +42,8 @@ char** get_filenames(char* path, int* count/*, const char* ext*/);
  * @note The returned pointer is part of the original filename and should not be modified or freed.
  * @note If the filename ends with a period, or if no period is found, NULL is returned.
  */
-char* get_file_extension(const char* filename);
-
+char*
+get_file_extension(const char* filename);
 
 /**
  * @brief Prints filenames along with their indices from an array of strings.
@@ -53,5 +54,5 @@ char* get_file_extension(const char* filename);
  * @param fileList The array of filenames.
  * @param fcount The count of filenames.
  */
-void print_filenames(char* fileList[], int fcount);
-
+void
+print_filenames(char* fileList[], int fcount);

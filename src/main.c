@@ -6,14 +6,17 @@
 void process_file(char* filename, const char* dest_dir, int* successCount);
 void print_summary(int successCount, int totalFiles);
 
-int main()
+int
+main(argc, argv)
+    int argc;
+    char* argv[];
 {
-    //char* ftype = NULL;                   // file extension
+    //char* ftype = NULL;                 // file extension
     char src_dir[_MAX_PATH] = "";         // source folder containing audio files
     char dest_dir[_MAX_PATH] = "";        // destination folder (music library)
     char** fileList = NULL;               // list of files
     int fcount = 0;                       // number of files
-    int successCount = 0;                  // number of files successfully processed
+    int successCount = 0;                 // number of files successfully processed
 
     // Read configuration file / initial setup
     if (setup(src_dir, dest_dir) != 0) {
@@ -42,7 +45,11 @@ int main()
 }
 
 // Function to process each file
-void process_file(char* filename, const char* dest_dir, int* successCount)
+void
+process_file(filename, dest_dir, successCount)
+    char* filename;
+    const char* dest_dir;
+    int* successCount;
 {
     audioMetaData* meta = NULL;
     char oldPath[_MAX_PATH] = "";
@@ -91,7 +98,10 @@ void process_file(char* filename, const char* dest_dir, int* successCount)
 }
 
 // Function to print the summary
-void print_summary(int successCount, int totalFiles)
+void
+print_summary(successCount, totalFiles)
+    int successCount;
+    int totalFiles;
 {
     printf("%d files processed successfully,", successCount);
     printf(" %d files failed.\n\n", totalFiles - successCount);

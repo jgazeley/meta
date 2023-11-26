@@ -1,6 +1,9 @@
 #include "../include/config.h"
 
-int is_valid_drive_path(const char* path) {
+int
+is_valid_drive_path(path)
+    const char* path;
+{
 #ifdef _WIN32
     // Check for Windows drive letter and colon followed by optional backslash or forward slash
     return (isalpha(path[0]) && path[1] == ':' && (path[2] == '\0' || path[2] == '/' || path[2] == '\\'));
@@ -12,7 +15,10 @@ int is_valid_drive_path(const char* path) {
 #endif
 }
 
-int setup(char* src_path, char* dest_path)
+int
+setup(src_path, dest_path)
+    char* src_path;
+    char* dest_path;
 {
     FILE* cfg;
     const char* config = "dir.ini";

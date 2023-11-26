@@ -1,6 +1,10 @@
 #include "../include/metadata.h"
 
-static void initialize_audioMetaData(audioMetaData* meta, const char* filename, char* ext)
+static void
+initialize_audioMetaData(meta, filename, ext)
+    audioMetaData* meta;
+    const char* filename;
+    char* ext;
 {
     // Initialize struct member values
     strcpy(meta->pathname, filename);
@@ -20,7 +24,9 @@ static void initialize_audioMetaData(audioMetaData* meta, const char* filename, 
     }
 }
 
-void print_audioMetaData(audioMetaData* meta)
+void
+print_audioMetaData(meta)
+    audioMetaData* meta;
 {
     printf("Artist:  \t%s\n", meta->artist);
     printf("Album:   \t%s\n", meta->album);
@@ -34,7 +40,11 @@ void print_audioMetaData(audioMetaData* meta)
     printf("Source file:  \t%s\n\n", meta->pathname);
 }
 
-static bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length)
+static bool
+validateFlacMeta(buffer, offset, length)
+    BYTE** buffer;
+    int* offset;
+    DWORD length;
 {
     bool result = true;
 
@@ -58,7 +68,12 @@ static bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length)
     return result;
 }
 
-static void updateMetadata(struct audioMetaData* flac_meta, enum MetadataType type, const char* tagString, int totalBytes)
+static void
+updateMetadata(flac_meta, type, tagString, totalBytes)
+    struct audioMetaData* flac_meta;
+    enum MetadataType type;
+    const char* tagString;
+    int totalBytes;
 {
     const char* tagNames[] = {"ARTIST=", "ALBUM=", "TITLE="};
     size_t tagLengths[] = {strlen("ARTIST="), strlen("ALBUM="), strlen("TITLE=")};
@@ -104,7 +119,9 @@ static void updateMetadata(struct audioMetaData* flac_meta, enum MetadataType ty
     }
 }
 
-static void replaceChars(char *str)
+static void
+replaceChars(str)
+    char* str;
 {
     while (*str) {
         if (*str == '/' || *str == '\\' || *str == '?') {
@@ -114,7 +131,11 @@ static void replaceChars(char *str)
     }
 }
 
-static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size)
+static bool
+parseFlacMeta(flac_meta, buffer, size)
+    audioMetaData* flac_meta;
+    BYTE* buffer;
+    int size;
 {
     DWORD length = 0;              // Stores the length of the current metadata block
     char* tagString = NULL;        // Pointer to dynamically allocated memory for the current tag string
@@ -193,7 +214,9 @@ static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size)
     return true;
 }
 
-audioMetaData* get_audioMetaData_flac(const char* filename)
+audioMetaData*
+get_audioMetaData_flac(filename)
+    const char* filename;
 {
     audioMetaData* flac_meta = (audioMetaData*)malloc(sizeof(audioMetaData));
     FILE* file;                     // the FLAC file containing metadata
@@ -271,7 +294,9 @@ cleanup:
     return NULL;
 }
 
-audioMetaData* get_audioMetaData_mp3(const char* filename)
+audioMetaData*
+get_audioMetaData_mp3(filename)
+    const char* filename;
 {
     audioMetaData* mp3_meta = (audioMetaData*)malloc(sizeof(audioMetaData));
     FILE* file;                     // the MP3 file containing metadata
@@ -302,8 +327,9 @@ audioMetaData* get_audioMetaData_mp3(const char* filename)
     return mp3_meta;
 }
 
-// Convert certain words to lowercase for song titles, albums, etc.
-static int toLowerCase(char* str)
+static int
+toLowerCase(str)
+    char* str;
 {
     // "function words" that are converted to lowercase
     char* words[] = {
@@ -330,13 +356,19 @@ static int toLowerCase(char* str)
     return conversionCount;
 }
 
-// Function to handle error messages
-void handle_error(const char* message) {
+void
+handle_error(message)
+    const char* message;
+{
     fprintf(stderr, "Error: %s\n", message);
 }
 
-// Function to create the artist folder
-bool create_artist_folder(const char* dest_dir, const char* artist, char* folder_name) {
+bool
+create_artist_folder(dest_dir, artist, folder_name)
+    const char* dest_dir;
+    const char* artist;
+    char* folder_name;
+{
     int result = snprintf(folder_name, MAX_LENGTH, "%s/%s", dest_dir, artist);
     if (result < 0 || result >= MAX_LENGTH) {
         handle_error("Error formatting artist folder name");
@@ -354,8 +386,13 @@ bool create_artist_folder(const char* dest_dir, const char* artist, char* folder
     return true;
 }
 
-// Function to create the album folder
-bool create_album_folder(const char* dest_dir, const char* artist, const char* album, char* folder_name) {
+bool
+create_album_folder(dest_dir, artist, album, folder_name)
+    const char* dest_dir;
+    const char* artist;
+    const char* album;
+    char* folder_name;
+{
     int result = snprintf(folder_name, MAX_LENGTH, "%s/%s/%s", dest_dir, artist, album);
     if (result < 0 || result >= MAX_LENGTH) {
         handle_error("Error formatting album folder name");
@@ -372,8 +409,11 @@ bool create_album_folder(const char* dest_dir, const char* artist, const char* a
     return true;
 }
 
-// Function to reformat the file name and path
-void reformat_file_path(audioMetaData* meta, const char* folder_name) {
+void
+reformat_file_path(meta, folder_name)
+    audioMetaData* meta;
+    const char* folder_name;
+{
     if (strchr(meta->title, '/') || strchr(meta->title, '\\') || strchr(meta->title, '?')) {
         // Assuming replaceChars is a function that replaces specific characters in a string
         replaceChars(meta->title);
@@ -381,8 +421,11 @@ void reformat_file_path(audioMetaData* meta, const char* folder_name) {
     sprintf(meta->pathname, "%s/%02d. %s.%s", folder_name, meta->track[0], meta->title, meta->fileext);
 }
 
-// Function to create the album folder structure
-bool create_folder_structure(audioMetaData* meta, const char* dest_dir) {
+bool
+create_folder_structure(meta, dest_dir)
+    audioMetaData* meta;
+    const char* dest_dir;
+{
     char folder_name[MAX_LENGTH] = "";
 
     if (strlen(meta->artist) == 0 || strlen(meta->album) == 0) {

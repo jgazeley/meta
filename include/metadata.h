@@ -70,7 +70,8 @@ typedef enum {
  * @param filename The path to the audio file associated with the metadata.
  * @param ext The file extension of the audio file.
  */
-static void initialize_audioMetaData(audioMetaData* meta, const char* filename, char* ext);
+static void
+initialize_audioMetaData(audioMetaData* meta, const char* filename, char* ext);
 
 
 /**
@@ -81,7 +82,8 @@ static void initialize_audioMetaData(audioMetaData* meta, const char* filename, 
  *
  * @param meta Pointer to the audioMetaData structure containing metadata to be printed.
  */
-void print_audioMetaData(audioMetaData* meta);
+void
+print_audioMetaData(audioMetaData* meta);
 
 
 /**
@@ -104,7 +106,8 @@ void print_audioMetaData(audioMetaData* meta);
  *       before returning. The caller is responsible for freeing the memory
  *       allocated for the identifier string.
  */
-static bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length);
+static bool
+validateFlacMeta(BYTE** buffer, int* offset, DWORD length);
 
 
 /**
@@ -123,7 +126,8 @@ static bool validateFlacMeta(BYTE** buffer, int* offset, DWORD length);
  *       the changes to the file. It also converts the updated field to lowercase,
  *       if applicable.
  */
-static void updateMetadata(struct audioMetaData* flac_meta, enum MetadataType type, const char* tagString, int totalBytes);
+static void
+updateMetadata(struct audioMetaData* flac_meta, enum MetadataType type, const char* tagString, int totalBytes);
 
 
 /**
@@ -135,7 +139,8 @@ static void updateMetadata(struct audioMetaData* flac_meta, enum MetadataType ty
  *
  * @param str Pointer to the string in which characters are to be replaced.
  */
-static void replaceChars(char *str);
+static void
+replaceChars(char *str);
 
 
 /**
@@ -157,7 +162,8 @@ static void replaceChars(char *str);
  *       before returning. The caller is responsible for freeing the memory
  *       allocated for the tagString.
  */
-static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size);
+static bool
+parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size);
 
 
 /**
@@ -178,7 +184,8 @@ static bool parseFlacMeta(audioMetaData* flac_meta, BYTE* buffer, int size);
  * @note The caller is responsible for freeing the allocated memory using free()
  *       when done using the audioMetaData structure.
  */
-audioMetaData* get_audioMetaData_flac(const char* filename);
+audioMetaData*
+get_audioMetaData_flac(const char* filename);
 
 
 /**
@@ -199,7 +206,8 @@ audioMetaData* get_audioMetaData_flac(const char* filename);
  * @note The caller is responsible for freeing the allocated memory using free()
  *       when done using the audioMetaData structure.
  */
-audioMetaData* get_audioMetaData_mp3(const char* filename);
+audioMetaData*
+get_audioMetaData_mp3(const char* filename);
 
 
 /**
@@ -216,7 +224,8 @@ audioMetaData* get_audioMetaData_mp3(const char* filename);
  * @return Returns the number of conversions (number of function words converted to
  *         lowercase) in the given string.
  */
-static int toLowerCase(char* str);
+static int
+toLowerCase(char* str);
 
 
 /**
@@ -226,7 +235,8 @@ static int toLowerCase(char* str);
  *
  * @param message The error message to be printed.
  */
-void handle_error(const char* message);
+void
+handle_error(const char* message);
 
 /**
  * @brief Create an artist folder in the specified destination directory.
@@ -238,7 +248,8 @@ void handle_error(const char* message);
  * @param folder_name A buffer to store the full path of the created folder.
  * @return True if the folder creation is successful, false otherwise.
  */
-bool create_artist_folder(const char* dest_dir, const char* artist, char* folder_name);
+bool
+create_artist_folder(const char* dest_dir, const char* artist, char* folder_name);
 
 /**
  * @brief Create an album folder in the specified destination directory.
@@ -251,7 +262,8 @@ bool create_artist_folder(const char* dest_dir, const char* artist, char* folder
  * @param folder_name A buffer to store the full path of the created folder.
  * @return True if the folder creation is successful, false otherwise.
  */
-bool create_album_folder(const char* dest_dir, const char* artist, const char* album, char* folder_name);
+bool
+create_album_folder(const char* dest_dir, const char* artist, const char* album, char* folder_name);
 
 /**
  * @brief Reformat the file name and path.
@@ -261,7 +273,8 @@ bool create_album_folder(const char* dest_dir, const char* artist, const char* a
  * @param meta The audioMetaData structure containing file information.
  * @param folder_name The name of the folder in which the file is stored.
  */
-void reformat_file_path(audioMetaData* meta, const char* folder_name);
+void
+reformat_file_path(audioMetaData* meta, const char* folder_name);
 
 /**
  * @brief Create the album folder structure.
@@ -272,4 +285,5 @@ void reformat_file_path(audioMetaData* meta, const char* folder_name);
  * @param dest_dir The destination directory where the folder structure should be created.
  * @return True if the folder structure creation is successful, false otherwise.
  */
-bool create_folder_structure(audioMetaData* meta, const char* dest_dir);
+bool
+create_folder_structure(audioMetaData* meta, const char* dest_dir);
